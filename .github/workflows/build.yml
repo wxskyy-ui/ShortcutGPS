@@ -29,6 +29,18 @@ jobs:
             chmod +x ./gradlew
           fi
 
+      - name: Upload wrapper files for manual commit back
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-wrapper-files
+          path: |
+            gradlew
+            gradlew.bat
+            gradle/wrapper/gradle-wrapper.jar
+            gradle/wrapper/gradle-wrapper.properties
+        continue-on-error: true
+
       - name: Build debug APK
         run: ./gradlew assembleDebug
 
@@ -37,8 +49,3 @@ jobs:
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Upload generated wrapper files for committing back
-        if: success() && !file_exists('gradlew')
-        run: echo "wrapper was generated this run"
-        continue-on-error: true
