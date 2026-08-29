@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 
 class MainActivity : Activity() {
 
@@ -18,27 +19,26 @@ class MainActivity : Activity() {
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(0, 0, 0, 0)
         }
 
-        // ===== 顶部状态栏 =====
+        // 顶部状态栏
         statusBar = TextView(this).apply {
             text = "  定位状态：读取中..."
             textSize = 18f
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(Color.WHITE)
             setPadding(40, 40, 40, 40)
-            gravity = android.view.Gravity.CENTER_VERTICAL
         }
         root.addView(statusBar)
 
-        // ===== 中间留白 + 圆形按钮 =====
+        // 占位留白
         val spacer = TextView(this).apply {
             text = ""
             setPadding(0, 120, 0, 0)
         }
         root.addView(spacer)
 
+        // 圆形切换按钮
         button = Button(this).apply {
             text = "切 换"
             textSize = 26f
@@ -94,21 +94,37 @@ class MainActivity : Activity() {
             val mode = runSu("settings get secure location_mode").trim()
             if (mode == "3") {
                 statusBar.text = "  ● 定位已开启"
-                statusBar.setBackgroundColor(Color.parseColor("#4CAF50")) // 绿色
+                statusBar.setBackgroundColor(Color.parseColor("#4CAF50"))
+                button.background = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.OVAL
+                    setColor(Color.parseColor("#4CAF50"))
+                }
             } else {
                 statusBar.text = "  ● 定位已关闭"
-                statusBar.setBackgroundColor(Color.parseColor("#F44336")) // 红色
+                statusBar.setBackgroundColor(Color.parseColor("#F44336"))
+                button.background = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.OVAL
+                    setColor(Color.parseColor("#2196F3"))
+                }
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             statusBar.text = "  ● 定位：未知"
-            statusBar.setBackgroundColor(Color.parseColor("#9E9E9E")) // 灰色
+            statusBar.setBackgroundColor(Color.parseColor("#9E9E9E"))
+            button.background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.OVAL
+                setColor(Color.GRAY)
+            }
         }
     }
 
     private fun runSu(command: String): String {
-        val process = Runtime.getRuntime().exec("su -c $command")
-        val output = process.inputStream.bufferedReader().readText().trim()
-        process.waitFor()
-        return output
+        return try {
+            val process = Runtime.getRuntime().exec("su -c $command")
+            val output = process.inputStream.bufferedReader().readText().trim()
+            process.waitFor()
+            output
+        } catch (e: Exception) {
+            ""
+        }
     }
 }
